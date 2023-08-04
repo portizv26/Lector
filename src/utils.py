@@ -38,10 +38,12 @@ import streamlit as st
 
 load_dotenv()
 
-try:
-    api_key = st.secrets["OPENAI_API_KEY"]
-except:
-    api_key = os.getenv("OPENAI_API_KEY")
+i=0
+
+if i==1:
+    openai.api_key = st.secrets["OPENAI_API_KEY"]
+else:
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # import logging
 # import sys
@@ -49,7 +51,7 @@ except:
 # logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 # logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
-def create_index(path):
+def create_index(path, exp_name=''):
     max_input = 4096
     tokens = 500
     chunk_size_limit = 1000 #for LLM, we need to define chunk size
@@ -63,10 +65,9 @@ def create_index(path):
                                 )
     #define LLM — there could be many models we can use, but in this example, let’s go with OpenAI model
     llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0, 
-                                               openai_api_key=api_key
                                                ),
                                 )
-    embed_model = LangchainEmbedding(OpenAIEmbeddings(openai_api_key=api_key))
+    embed_model = LangchainEmbedding(OpenAIEmbeddings())
 
     #load data — it will take all the .pdf files, if there are more than 1
     docs = SimpleDirectoryReader(path).load_data()
@@ -86,18 +87,18 @@ def create_index(path):
                                                      show_progress=False,
                                                      )
     
-    vectorIndex.storage_context.persist(persist_dir = 'Store')
+    vectorIndex.storage_context.persist(persist_dir = f'Store_{exp_name}')
 
     return vectorIndex
 
-def load_index():
-    storage_context = StorageContext.from_defaults(persist_dir = 'Store')
+def load_index(exp_name=''):
+    storage_context = StorageContext.from_defaults(persist_dir = f'Store_{exp_name}')
     index = load_index_from_storage(storage_context)
 
     return index
 
-def call_agent(chat_history):
-    index=load_index()
+def call_agent(chat_history, exp_name=''):
+    index=load_index(exp_name=exp_name)
     query_engine = index.as_query_engine()
 
     chat_engine = CondenseQuestionChatEngine.from_defaults(
