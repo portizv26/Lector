@@ -26,6 +26,8 @@ with st.sidebar:
     if uploaded_files:
         if 'qa' not in st.session_state:
             with st.spinner("Loading documents..."):
+                if 'temp' in os.listdir():
+                    shutil.rmtree('temp')
                 # shutil.rmtree('temp')
                 
                 os.mkdir('temp')
