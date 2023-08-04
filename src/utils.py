@@ -8,23 +8,15 @@ from llama_index import (
     PromptHelper,
     ServiceContext,
     StorageContext,
-    load_index_from_storage
+    load_index_from_storage,
+    set_global_service_context
     )
 
 # language model to use
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, AzureChatOpenAI
 # Embeding model to use
 from langchain.embeddings import OpenAIEmbeddings
 from llama_index import LangchainEmbedding
-
-# Create chatbot agent -> DEPRECATED FOR NOW
-# from langchain.chains.conversation.memory import ConversationBufferMemory
-# from langchain.agents import initialize_agent
-# from llama_index.langchain_helpers.agents import (
-#     LlamaToolkit, 
-#     create_llama_chat_agent, 
-#     IndexToolConfig
-#     )
 
 from llama_index.chat_engine.condense_question import CondenseQuestionChatEngine
 
@@ -37,19 +29,10 @@ from dotenv import load_dotenv
 import streamlit as st
 
 load_dotenv()
-
-i=0
-
-if i==1:
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-else:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# import logging
-# import sys
-
-# logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-# logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_type = st.secrets['OPENAI_API_TYPE']
+openai.api_version = st.secrets['OPENAI_API_VERSION']
+openai.api_base = st.secrets['OPENAI_API_BASE']
 
 def create_index(path, exp_name=''):
     max_input = 4096
@@ -64,8 +47,9 @@ def create_index(path, exp_name=''):
                                 chunk_size_limit = chunk_size_limit
                                 )
     #define LLM — there could be many models we can use, but in this example, let’s go with OpenAI model
-    llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0, 
-                                               ),
+    llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
+                                                    temperature=0,
+                                                    ),
                                 )
     embed_model = LangchainEmbedding(OpenAIEmbeddings())
 
@@ -81,7 +65,8 @@ def create_index(path, exp_name=''):
                                                    context_window = max_input,
                                                    num_output = tokens,
                                                    )
-    
+    set_global_service_context(service_context)
+
     vectorIndex = GPTVectorStoreIndex.from_documents(documents=docs,
                                                      service_context=service_context,
                                                      show_progress=False,
@@ -113,7 +98,7 @@ def get_history(session_list):
     # import time
     # t=time.time()
     chat_history=[
-            ChatMessage(role="system", content="You are a Data Science expert.")
+            ChatMessage(role="system", content="You are a very useful assistant.")
             ]
     if len(session_list) > 0:
         for i in session_list:
@@ -130,8 +115,8 @@ def get_history(session_list):
 #TODO LIST:
 # 1. Obtener la metadata de las respuestas -> done
 # 2. Que funcione con credenciales de azure -> not done
-# 3. Desplegar online
-# 4. Modulo para subir resultados.
+# 3. Desplegar online -> done
+# 4. Modulo para subir resultados. -> done
 # 5. personalizas system.
 
 

@@ -1,21 +1,15 @@
 import streamlit as st
-
 import openai
 import os
 from dotenv import load_dotenv
 import shutil
 
-load_dotenv()
-
-i=0
-
-if i==1:
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-else:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_type = st.secrets['OPENAI_API_TYPE']
+openai.api_version = st.secrets['OPENAI_API_VERSION']
+openai.api_base = st.secrets['OPENAI_API_BASE']
 
 from src.utils import *
-# st.write(os.listdir())
 st.title("Chat with your PDF's")
 
 with st.sidebar:
