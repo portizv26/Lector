@@ -98,7 +98,7 @@ def get_history(session_list):
     # import time
     # t=time.time()
     chat_history=[
-            ChatMessage(role="system", content="You are a very useful assistant.")
+            ChatMessage(role="system", content="Eres un asistente muy útil. Responde en español.")
             ]
     if len(session_list) > 0:
         for i in session_list:
