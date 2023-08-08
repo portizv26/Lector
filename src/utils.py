@@ -29,10 +29,18 @@ from dotenv import load_dotenv
 import streamlit as st
 
 load_dotenv()
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-openai.api_type = st.secrets['OPENAI_API_TYPE']
-openai.api_version = st.secrets['OPENAI_API_VERSION']
-openai.api_base = st.secrets['OPENAI_API_BASE']
+# openai.api_key = st.secrets["OPENAI_API_KEY"]
+# openai.api_type = st.secrets['OPENAI_API_TYPE']
+# openai.api_version = st.secrets['OPENAI_API_VERSION']
+# openai.api_base = st.secrets['OPENAI_API_BASE']
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_type = os.getenv('OPENAI_API_TYPE')
+# openai.api_version = os.getenv('OPENAI_API_VERSION')
+# openai.api_base = os.getenv('OPENAI_API_BASE')
+
+# openai.api_key = os.getenv("API_KEY")
+
 
 def create_index(path, exp_name=''):
     max_input = 4096
@@ -47,8 +55,11 @@ def create_index(path, exp_name=''):
                                 chunk_size_limit = chunk_size_limit
                                 )
     #define LLM — there could be many models we can use, but in this example, let’s go with OpenAI model
-    llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
-                                                    temperature=0,
+    # llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
+    #                                                 temperature=0,
+    #                                                 ),
+    #                             )
+    llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0,
                                                     ),
                                 )
     embed_model = LangchainEmbedding(OpenAIEmbeddings())
@@ -72,34 +83,42 @@ def create_index(path, exp_name=''):
                                                      show_progress=False,
                                                      )
     
-    vectorIndex.storage_context.persist(persist_dir = f'Store_{exp_name}')
+    vectorIndex.storage_context.persist(persist_dir = f'Storage/{exp_name}')
 
     return vectorIndex
 
 def load_index(exp_name=''):
-    storage_context = StorageContext.from_defaults(persist_dir = f'Store_{exp_name}')
+    storage_context = StorageContext.from_defaults(persist_dir = f'Storage/{exp_name}')
     index = load_index_from_storage(storage_context)
 
     return index
 
 def call_agent(chat_history, exp_name=''):
-    index=load_index(exp_name=exp_name)
-    query_engine = index.as_query_engine()
+    if exp_name == '':
+        return None
+    else:
+        index=load_index(exp_name=exp_name)
+        query_engine = index.as_query_engine()
 
-    chat_engine = CondenseQuestionChatEngine.from_defaults(
-        query_engine=query_engine, 
-        # condense_question_prompt=custom_prompt,
-        chat_history=chat_history,
-        verbose=False
-    )
-    return chat_engine
+        chat_engine = CondenseQuestionChatEngine.from_defaults(
+            query_engine=query_engine, 
+            # condense_question_prompt=custom_prompt,
+            chat_history=chat_history,
+            verbose=False
+        )
+        return chat_engine
 
-def get_history(session_list):
+def get_history(session_list, system_role=""):
     # import time
     # t=time.time()
-    chat_history=[
-            ChatMessage(role="system", content="Eres un asistente muy útil. Responde en español.")
-            ]
+    if system_role == "":
+        chat_history=[
+                ChatMessage(role="system", content="Eres un asistente muy útil. Responde en español.")
+                ]
+    else:
+        chat_history=[
+                ChatMessage(role="system", content=f"Eres un {system_role.lower()}. Responde en español.")
+                ]
     if len(session_list) > 0:
         for i in session_list:
             if i['role'] == 'user':
@@ -112,13 +131,78 @@ def get_history(session_list):
     else:
         return chat_history
     
+def check_exp_name(exp_name, session_string):
+    exp_name_store = f'{exp_name}'
+    if session_string != "":
+        return True
+    else:
+        if exp_name_store in os.listdir('Storage'):
+            st.error('El nombre de experimento ya existe, por favor elija otro.')
+            return False
+        elif (exp_name == ''):
+            st.error('Ingrese un nombre de experimento.')
+            return False
+        else:
+            return True
+        
+def check_role(system_role, exp_name=''):
+    if system_role == "":
+        return False
+    else:
+        save_personality(system_role, exp_name)
+        return True
+        
+def save_personality(system_role, exp_name=""):
+    try:
+        os.makedirs(f'Storage/{exp_name}')
+    except:
+        pass
+    f = open(f"Storage/{exp_name}/role.txt", "w")
+    f.write(system_role)
+    f.close()
+
+def get_personality(exp_name):
+    try:
+        p = f'Storage/{exp_name}/role.txt'
+        with open(p) as f:  
+            contents = f.read()
+        personality = contents.title()
+        st.write(f'{8*"____"}\nLa personalidad del modelo es: {personality}')
+    except:
+        pass
+
+def docs_uploaded(exp_name):
+    try:
+        os.makedirs(f'Storage/{exp_name}')
+    except:
+        pass
+
+    docs = [i.removesuffix('.pdf') for i in os.listdir('temp')]
+    string = 'El modelo fue entrenado con los siguientes PDFs:'
+    for doc in docs:
+        string += f'\n\n{doc}'
+        
+    f = open(f"Storage/{exp_name}/docs.txt", "w")
+    f.write(string)
+    f.close()
+
+def get_docs_uploaded(exp_name):
+    p = f'Storage/{exp_name}/docs.txt'
+    with open(p) as f:  
+        documents_uploaded = f.read()
+    st.write(f'{8*"____"}\n{documents_uploaded}')
+    
+
 #TODO LIST:
 # 1. Obtener la metadata de las respuestas -> done
-# 2. Que funcione con credenciales de azure -> not done
+# 2. Que funcione con credenciales de azure -> done -> problemas
 # 3. Desplegar online -> done
 # 4. Modulo para subir resultados. -> done
-# 5. personalizas system.
-
+# 5. personalizar system. -> done
+# 6. Elegir modelo anterior -> done
+# 6,5 -> Explicar que tiene modelo anterior. -> done
+# 7. logo -> done
+# 8. lógica para nombre de experimento -> done
 
 
 # # list of `ChatMessage` objects
