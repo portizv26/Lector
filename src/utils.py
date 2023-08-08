@@ -35,12 +35,12 @@ load_dotenv()
 # openai.api_base = st.secrets['OPENAI_API_BASE']
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-# openai.api_type = os.getenv('OPENAI_API_TYPE')
-# openai.api_version = os.getenv('OPENAI_API_VERSION')
-# openai.api_base = os.getenv('OPENAI_API_BASE')
+openai.api_type = os.getenv('OPENAI_API_TYPE')
+openai.api_version = os.getenv('OPENAI_API_VERSION')
+openai.api_base = os.getenv('OPENAI_API_BASE')
 
 # openai.api_key = os.getenv("API_KEY")
-
+# st.write(openai.api_key)
 
 def create_index(path, exp_name=''):
     max_input = 4096
@@ -55,13 +55,13 @@ def create_index(path, exp_name=''):
                                 chunk_size_limit = chunk_size_limit
                                 )
     #define LLM — there could be many models we can use, but in this example, let’s go with OpenAI model
-    # llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
-    #                                                 temperature=0,
-    #                                                 ),
-    #                             )
-    llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0,
+    llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
+                                                    temperature=0,
                                                     ),
                                 )
+    # llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0,
+    #                                                 ),
+    #                             )
     embed_model = LangchainEmbedding(OpenAIEmbeddings())
 
     #load data — it will take all the .pdf files, if there are more than 1
