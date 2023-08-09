@@ -11,7 +11,7 @@ openai.api_version = os.getenv('OPENAI_API_VERSION')
 openai.api_base = os.getenv('OPENAI_API_BASE')
 
 from src.utils import *
-
+l = 0
 # Basic text for the app
 st.title("Conversa con tus PDF's")
 st.write('''Aplicación en etapa de testeo para que puedan interactuar con sus documentos por medio de un chat.

@@ -31,6 +31,7 @@ import streamlit as st
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
+# st.write(openai.api_key)
 # openai.api_type = os.getenv('OPENAI_API_TYPE')
 # openai.api_version = os.getenv('OPENAI_API_VERSION')
 # openai.api_base = os.getenv('OPENAI_API_BASE')
@@ -97,9 +98,9 @@ def load_index(exp_name=''):
     storage_context = StorageContext.from_defaults(persist_dir = f'Storage/{exp_name}')
     
     # Load the index from the storage using the initialized context.
-    index = load_index_from_storage(storage_context)
+    vectorIndex = load_index_from_storage(storage_context)
 
-    return index
+    return vectorIndex
     
 def call_agent(chat_history, exp_name):
     # Check if experiment name is empty.
