@@ -31,9 +31,9 @@ import streamlit as st
 load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_type = os.getenv('OPENAI_API_TYPE')
-openai.api_version = os.getenv('OPENAI_API_VERSION')
-openai.api_base = os.getenv('OPENAI_API_BASE')
+# openai.api_type = os.getenv('OPENAI_API_TYPE')
+# openai.api_version = os.getenv('OPENAI_API_VERSION')
+# openai.api_base = os.getenv('OPENAI_API_BASE')
 
 def create_index(path, exp_name):
     # Define constants.
@@ -48,14 +48,16 @@ def create_index(path, exp_name):
                                 chunk_overlap_ratio=chunk_overlap_ratio,
                                 chunk_size_limit=chunk_size_limit
                                 )
+    
     # Initializing the LLMPredictor using the OPENAI model.
-    llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
-                                                    temperature=0,
-                                                    ),
-                                )
-    # llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0,
-    #                                            ),
+    # llmPredictor = LLMPredictor(llm=AzureChatOpenAI(deployment_name='gpt-35-turbo',
+    #                                                 temperature=0,
+    #                                                 ),
     #                             )
+    
+    llmPredictor = LLMPredictor(llm=ChatOpenAI(temperature=0,
+                                               ),
+                                )
     
     # Initializing the embedding model.
     embed_model = LangchainEmbedding(OpenAIEmbeddings())
@@ -94,7 +96,6 @@ def load_index(exp_name=''):
 
     return index
     
-
 def call_agent(chat_history, exp_name):
     # Check if experiment name is empty.
     # This could happen if the user is trying to call an agent that has not been created yet.
@@ -234,6 +235,8 @@ def docs_uploaded(exp_name):
 # 6,5 -> Explicar que tiene modelo anterior. -> done
 # 7. logo -> done
 # 8. lógica para nombre de experimento -> done
+# 9. Si metadata no cambia no mostrar ->
+# 10
 
 # # list of `ChatMessage` objects
 # custom_chat_history = [

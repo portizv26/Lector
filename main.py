@@ -171,9 +171,8 @@ if st.session_state.exp_bool:
             st.session_state.answering = False
             
         # st.write('hola2')
-        
-        # Boton de reinicio de conversación.
-        # if len(st.session_state.messages) >= 2:
+
+        # if not st.session_state.answering & len(st.session_state.messages) >= 2:
         #     reset_button = st.button("Reiniciar conversación")
         #     st.write(reset_button)
         #     if reset_button:
