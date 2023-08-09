@@ -35,6 +35,11 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # openai.api_version = os.getenv('OPENAI_API_VERSION')
 # openai.api_base = os.getenv('OPENAI_API_BASE')
 
+try:
+    os.makedirs(f'Storage/')
+except:
+    pass
+
 def create_index(path, exp_name):
     # Define constants.
     max_input = 4096
