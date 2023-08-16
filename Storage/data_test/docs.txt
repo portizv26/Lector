@@ -1,3 +1,0 @@
-El modelo fue entrenado con los siguientes PDFs:
-
-Feature Selection

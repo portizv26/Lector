@@ -1,0 +1,5 @@
+El modelo fue entrenado con los siguientes PDFs:
+
+2003_Guyon_Elisseeff_An_Introduction_to_Variable_and_Feature_Selection
+
+2005_Xu_Wunsch_Survey_of_Clustering_Algorithms

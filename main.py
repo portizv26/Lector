@@ -153,13 +153,12 @@ if st.session_state.exp_bool:
                 # get the response from the model
                 response = agent.chat(prompt)
                 # get the response content from the model
-                full_response = f"{response.response} \n {8*'_'}"
+                response_text = response.response
                 mdata = response.metadata
+                full_response = f"{response.response} \n {8*'_'}"
                 for ref in mdata.values():
                     full_response += f'\n\n doc: {ref["file_name"]} | page: {ref["page_label"]}'
 
-            # add the response to the session messages
-             # st.write('hola')
             # Display the response from the model
             with st.chat_message("assistant"):
                 # set an empty space
@@ -167,7 +166,7 @@ if st.session_state.exp_bool:
                 # display the response
                 message_placeholder.markdown(full_response)
 
-            st.session_state.messages.append({"role": "assistant", "content": full_response, "metadata": response.metadata})
+            st.session_state.messages.append({"role": "assistant", "content": response_text, "metadata": response.metadata})
             st.session_state.answering = False
             
         # st.write('hola2')
