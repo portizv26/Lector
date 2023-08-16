@@ -87,7 +87,7 @@ def create_index(path, exp_name):
     # Creating the GPTVectorStoreIndex from the loaded documents.
     vectorIndex = GPTVectorStoreIndex.from_documents(documents=docs,
                                                      service_context=service_context,
-                                                     show_progress=False,
+                                                     show_progress=True,
                                                      )
     # Persisting the created vector index to storage.
     vectorIndex.storage_context.persist(persist_dir=f'Storage/{exp_name}')
@@ -113,13 +113,14 @@ def call_agent(chat_history, exp_name):
         index = load_index(exp_name=exp_name)
         
         # Get the query engine for the loaded index.
-        query_engine = index.as_query_engine()
+        query_engine = index.as_query_engine(response_mode='tree_summarize', 
+                                             verbose=True)
 
         # Initialize the chat engine with the query engine and chat history provided.
         chat_engine = CondenseQuestionChatEngine.from_defaults(
             query_engine=query_engine, 
             chat_history=chat_history,
-            verbose=False
+            verbose=True
         )
         return chat_engine
     
